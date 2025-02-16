@@ -7,14 +7,21 @@ import pandas as pd
 import plotly.express as px
 from io import StringIO
 import requests
+import os
 
 from codebase.dashboard_graphs import MaternalHealthDashboard
 
-scale_mp = pickle.load(open(".\model\scaler.sav", "rb"))
-maternal_model = pickle.load(open(".\model\_finalized_maternal_model_gbc.sav", "rb"))
-maternal_model_rf = pickle.load(open(".\model\_finalized_maternal_model.sav", "rb"))
-scale_fetus = pickle.load(open(".\model\scaler_fetus.sav", "rb"))
-fetus_model = pickle.load(open(".\model\optimized_fetal_health_model.sav", "rb"))
+relative_scaler = os.path.join("..", "model", "scaler.sav")
+relative_finalized_maternal_model_gbc = os.path.join(
+    "..", "model", "_finalized_maternal_model_gbc.sav"
+)
+relative_finalized_maternal_model_rf = os.path.join(
+    "..", "model", "_finalized_maternal_model.sav"
+)
+relativescaler_fetus = os.path.join("..", "model", "scaler_fetus.sav")
+relativeoptimized_fetal_health_model = os.path.join(
+    "..", "model", "optimized_fetal_health_model.sav"
+)
 
 
 # sidebar for navigation
@@ -124,10 +131,12 @@ if selected == "Pregnancy Risk Prediction":
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 # scaling is important.
-                scaled_input = scale_mp.transform(
+                scaled_input = relative_scaler.transform(
                     [[age, diastolicBP, BS, bodyTemp, heartRate]]
                 )
-                predicted_risk_mp = maternal_model_rf.predict(scaled_input)
+                predicted_risk_mp = relative_finalized_maternal_model_rf.predict(
+                    scaled_input
+                )
             # st
             st.subheader("Risk Level:")
             if predicted_risk_mp[0] == 0:
@@ -262,8 +271,10 @@ if selected == "Fetal Health Prediction":
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
 
-                scale_fetus_input = scale_fetus.transform(input_data)
-                predicted_risk = fetus_model.predict(scale_fetus_input)
+                scale_fetus_input = relativescaler_fetus.transform(input_data)
+                predicted_risk = relativeoptimized_fetal_health_model.predict(
+                    scale_fetus_input
+                )
                 # st.subheader("Risk Level:")
                 risk_class = predicted_risk[0]
 
